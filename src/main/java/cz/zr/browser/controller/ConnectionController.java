@@ -50,7 +50,10 @@ public class ConnectionController {
     return response;
   }
 
-  @ApiOperation(value = "Get connections", nickname = "getConnections")
+  /**
+   * Returns all available connections. Manual pagination, sorting and filtering is not supported yet.
+   */
+  @ApiOperation(value = "Returns all available connections. (Manual pagination, sorting and filtering is not supported yet.)", nickname = "getConnections")
   @ApiResponses(value = {
     @ApiResponse(code = 200, message = "Success", response = ConnectionsResponseDto.class),
     @ApiResponse(code = 500, message = "Internal server error", response = ErrorResponseDto.class)
