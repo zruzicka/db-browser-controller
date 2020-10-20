@@ -1,0 +1,38 @@
+server:
+  servlet:
+    context-path: /db-browser-controller
+
+spring:
+  jackson:
+    default-property-inclusion: NON_NULL
+  liquibase:
+    change-log: classpath:db/liquibase-changelog.xml
+    enabled: true
+  datasource:
+    url: jdbc:mariadb://localhost:3306/db_browser?useUnicode=yes;characterEncoding=UTF-8
+    username: ...
+    password: ...
+    driver-class-name: org.mariadb.jdbc.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+    initialization-mode: never
+
+    # Keep the connection alive if idle for a long time (needed in production)
+    hikari:
+      minimumIdle: 2
+      maximumPoolSize: 10
+      idleTimeout: 25000
+      connectionTimeout: 30000
+      poolName: controller-pool
+      connection-test-query: SELECT 1
+      registerMbeans: true
+      allowPoolSuspension: true
+  jpa:
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, update, validate, none)
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MariaDB103Dialect
+    show-sql: true

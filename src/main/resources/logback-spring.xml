@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+  <property name="MAIN_PACKAGE" value="cz.zr.browser"/>
+
+  <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%t %-5.5p %date [%c{1}:%line] %m%n</pattern>
+    </encoder>
+  </appender>
+
+  <logger name="org.springframework" level="WARN"/>
+  <logger name="org.hibernate" level="INFO"/>
+  <logger name="liquibase.changelog" level="INFO"/>
+  <logger name="${MAIN_PACKAGE}" level="TRACE"/>
+
+  <root level="INFO">
+    <appender-ref ref="stdout"/>
+  </root>
+</configuration>
