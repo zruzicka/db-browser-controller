@@ -6,13 +6,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.Collection;
+
 @Data
 @Builder
 @AllArgsConstructor
 @ApiModel
-public class TableResponseDto {
+public class ColumnsResponseDto {
 
   @ApiModelProperty
-  private String name;
-
+  private Collection<ColumnDto> columns;
 }

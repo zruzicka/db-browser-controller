@@ -10,7 +10,7 @@ public enum RestResponse {
 
   NOT_FOUND(HttpStatus.NOT_FOUND, 404, "Not found"),
   INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 500, "Internal server error"),
-  DB_TABLES_LOADING_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 50001, "DB tables loading failed."),
+  DB_STRUCTURE_LOADING_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 50001, "DB structure loading failed."),
   ;
 
   private HttpStatus status;
