@@ -13,11 +13,16 @@ import javax.servlet.http.HttpServletResponse;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-  @ExceptionHandler({GenericInternalErrorException.class})
-  public ErrorResponseDto handleRegistrationException(GenericInternalErrorException e,
-                                                      HttpServletRequest request, HttpServletResponse response) {
+  @ExceptionHandler({NotFoundException.class})
+  public ErrorResponseDto handleException(NotFoundException e, HttpServletRequest request, HttpServletResponse response) {
     log.error(getLogMessage(e), e);
-    return prepareErrorResponse(e.getRestResponse(), request, response);
+    return prepareErrorResponse(e.getResponse(), request, response);
+  }
+
+  @ExceptionHandler({GenericInternalErrorException.class})
+  public ErrorResponseDto handleException(GenericInternalErrorException e, HttpServletRequest request, HttpServletResponse response) {
+    log.error(getLogMessage(e), e);
+    return prepareErrorResponse(e.getResponse(), request, response);
   }
 
   private ErrorResponseDto prepareErrorResponse(RestResponse restError, HttpServletRequest request,

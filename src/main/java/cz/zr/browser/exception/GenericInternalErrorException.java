@@ -6,11 +6,11 @@ import lombok.Getter;
 @Getter
 public class GenericInternalErrorException extends RuntimeException {
 
-  private RestResponse restResponse;
+  private RestResponse response;
 
   public GenericInternalErrorException(RestResponse restResponse) {
     super(restResponse.getMessage());
-    this.restResponse = restResponse;
+    this.response = restResponse;
   }
 
 }
