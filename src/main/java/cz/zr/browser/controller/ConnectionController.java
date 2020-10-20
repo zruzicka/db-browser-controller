@@ -1,12 +1,15 @@
 package cz.zr.browser.controller;
 
-import cz.zr.browser.dto.request.ConnectionRequestDTO;
-import cz.zr.browser.dto.response.ConnectionResponseDTO;
-import cz.zr.browser.dto.response.ErrorResponseDTO;
+import cz.zr.browser.dto.request.ConnectionRequestDto;
+import cz.zr.browser.dto.response.ConnectionResponseDto;
+import cz.zr.browser.dto.response.ConnectionsResponseDto;
+import cz.zr.browser.dto.response.ErrorResponseDto;
+import cz.zr.browser.service.ConnectionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,35 +25,38 @@ import javax.validation.Valid;
 @Api
 @Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/v1/connections")
 public class ConnectionController {
 
+  private final ConnectionService connectionService;
+
   @ApiOperation(value = "Create connection", nickname = "postConnection")
   @ApiResponses(value = {
-    @ApiResponse(code = 201, message = "Registered", response = ConnectionResponseDTO.class),
-    @ApiResponse(code = 400, message = "Bad request", response = ErrorResponseDTO.class),
-    @ApiResponse(code = 500, message = "Internal server error", response = ErrorResponseDTO.class)
+    @ApiResponse(code = 201, message = "Registered", response = ConnectionResponseDto.class),
+    @ApiResponse(code = 400, message = "Bad request", response = ErrorResponseDto.class),
+    @ApiResponse(code = 500, message = "Internal server error", response = ErrorResponseDto.class)
   })
-  @PostMapping(produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  @PostMapping(consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
   @ResponseStatus(value = HttpStatus.CREATED)
-  public ConnectionResponseDTO postConnection(@Valid @RequestBody ConnectionRequestDTO signupRequestDTO) {
+  public ConnectionResponseDto postConnection(@Valid @RequestBody ConnectionRequestDto requestDTO) {
     log.info("REST POST /v1/connections START");
-    ConnectionResponseDTO response = new ConnectionResponseDTO();
+    ConnectionResponseDto response = connectionService.createConnection(requestDTO);
     log.info("REST POST /v1/connections END, Response: {}", response);
     return response;
   }
 
   @ApiOperation(value = "Get connections", nickname = "getConnections")
   @ApiResponses(value = {
-    @ApiResponse(code = 201, message = "Registered", response = ConnectionResponseDTO.class),
-    @ApiResponse(code = 400, message = "Bad request", response = ErrorResponseDTO.class),
-    @ApiResponse(code = 500, message = "Internal server error", response = ErrorResponseDTO.class)
+    @ApiResponse(code = 201, message = "Registered", response = ConnectionResponseDto.class),
+    @ApiResponse(code = 400, message = "Bad request", response = ErrorResponseDto.class),
+    @ApiResponse(code = 500, message = "Internal server error", response = ErrorResponseDto.class)
   })
   @GetMapping(produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
   @ResponseStatus(value = HttpStatus.OK)
-  public ConnectionResponseDTO getConnections() {
+  public ConnectionsResponseDto getConnections() {
     log.info("REST GET /v1/connections START");
-    ConnectionResponseDTO response = new ConnectionResponseDTO();
+    ConnectionsResponseDto response = connectionService.getConnections();
     log.info("REST GET /v1/connections END, Response: {}", response);
     return response;
   }

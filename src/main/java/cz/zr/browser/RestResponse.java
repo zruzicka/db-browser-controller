@@ -1,12 +1,10 @@
 package cz.zr.browser;
 
-import cz.zr.browser.dto.response.ErrorResponseDTO;
+import cz.zr.browser.dto.response.ErrorResponseDto;
 import cz.zr.browser.exception.GenericInternalErrorException;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.http.HttpStatus;
-
-import java.util.List;
 
 public enum RestResponse {
 
@@ -41,8 +39,8 @@ public enum RestResponse {
     return message;
   }
 
-  public ErrorResponseDTO getErrorResponse() {
-    return ErrorResponseDTO.builder().status(this.status.value()).message(this.message).build();
+  public ErrorResponseDto getErrorResponse() {
+    return ErrorResponseDto.builder().status(this.status.value()).message(this.message).build();
   }
 
   public String toString() {

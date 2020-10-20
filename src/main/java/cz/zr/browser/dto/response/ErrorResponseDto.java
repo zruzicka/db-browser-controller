@@ -12,8 +12,8 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ApiModel(value = "ErrorResponseDTO")
-public class ErrorResponseDTO {
+@ApiModel
+public class ErrorResponseDto {
 
   private LocalDate timestamp;
   private Integer status;

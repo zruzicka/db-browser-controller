@@ -20,6 +20,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <java.version>11</java.version>
     <springfox.version>3.0.0</springfox.version>
+    <version.mapstruct>1.3.1.Final</version.mapstruct>
     <version.simplexml>2.7.1</version.simplexml>
     <version.common-io>2.6</version.common-io>
     <version.spring-security-config>5.2.2.RELEASE</version.spring-security-config>
@@ -61,6 +62,17 @@
       <version>${version.spring-security-config}</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.mapstruct</groupId>
+      <artifactId>mapstruct</artifactId>
+      <version>${version.mapstruct}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mapstruct</groupId>
+      <artifactId>mapstruct-processor</artifactId>
+      <optional>true</optional>
+      <version>${version.mapstruct}</version>
+    </dependency>
     <dependency>
       <groupId>com.googlecode.json-simple</groupId>
       <artifactId>json-simple</artifactId>
@@ -119,11 +131,17 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-test</artifactId>
-      <version>${version.spring-test}</version>
-      <scope>compile</scope>
+      <groupId>io.rest-assured</groupId>
+      <artifactId>spring-mock-mvc</artifactId>
+      <version>3.0.0</version>
+      <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.module</groupId>
+      <artifactId>jackson-module-jaxb-annotations</artifactId>
+      <version>2.11.3</version>
+    </dependency>
+
   </dependencies>
 
 </project>
