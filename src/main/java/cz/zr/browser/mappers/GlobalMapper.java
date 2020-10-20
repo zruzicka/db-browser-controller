@@ -1,7 +1,7 @@
 package cz.zr.browser.mappers;
 
 import cz.zr.browser.dto.request.ConnectionRequestDto;
-import cz.zr.browser.dto.response.ConnectionResponseDto;
+import cz.zr.browser.dto.response.ConnectionDto;
 import cz.zr.browser.entities.ConnectionEntity;
 import org.mapstruct.Mapper;
 
@@ -12,7 +12,7 @@ public interface GlobalMapper {
 
   ConnectionEntity connectionRequestToConnectionEntity(ConnectionRequestDto requestDto);
 
-  ConnectionResponseDto connectionEntityToConnectionResponseDto(ConnectionEntity entity);
+  ConnectionDto connectionEntityToConnectionResponseDto(ConnectionEntity entity);
 
-  List<ConnectionResponseDto> connectionEntityToConnectionResponseDto(List<ConnectionEntity> connections);
+  List<ConnectionDto> connectionEntityToConnectionResponseDto(List<ConnectionEntity> connections);
 }

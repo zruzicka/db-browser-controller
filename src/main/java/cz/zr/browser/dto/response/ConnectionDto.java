@@ -12,7 +12,7 @@ import java.util.Date;
 @Builder
 @AllArgsConstructor
 @ApiModel
-public class ConnectionResponseDto {
+public class ConnectionDto {
 
   @ApiModelProperty
   private Long id;
