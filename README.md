@@ -18,9 +18,9 @@ When started locally, Swagger API contract is available at http://localhost:8080
 HTTP| Endpoint | Description
 --|--|--
 GET | ​/db-browser-controller​/v1​/connections | Returns all available connections. (Pagination, sorting and filtering is not supported yet.)
-POST | ​/db-browser-controller​/v1​/connections | Create connection
-PUT | ​/db-browser-controller​/v1​/connections​/{id} | Update connection
-DELETE | ​/db-browser-controller​/v1​/connections​/{id} | Delete connection
+POST | ​/db-browser-controller​/v1​/connections | Creates new DB connection record.
+PUT | ​/db-browser-controller​/v1​/connections​/{id} | Updates DB connection record.
+DELETE | ​/db-browser-controller​/v1​/connections​/{id} | Deletes DB connection record.
 
 ### DB Browser Controller
 * Provides REST API for browsing structure and data using database connections stored via Connection Controller above.
@@ -28,6 +28,7 @@ DELETE | ​/db-browser-controller​/v1​/connections​/{id} | Delete connect
 
 HTTP| Endpoint | Description
 --|--|--
+GET | ​/db-browser-controller​/v1​/connections​/{id}​/schemas | Returns all available schemas of selected DB connection.
 GET | ​/db-browser-controller​/v1​/connections​/{id}​/tables | Returns all available tables of selected DB connection.
 GET | ​/db-browser-controller​/v1​/connections​/{id}​/tables​/{tableName}​/columns | Returns all available columns of selected DB connection and DB table.
 GET | ​/db-browser-controller​/v1​/connections​/{id}​/tables​/{tableName}​/preview | Returns all available rows of selected DB connection and DB table.

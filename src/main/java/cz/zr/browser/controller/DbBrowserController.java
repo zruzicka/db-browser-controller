@@ -4,6 +4,7 @@ import cz.zr.browser.dto.response.ColumnsResponseDto;
 import cz.zr.browser.dto.response.ConnectionDto;
 import cz.zr.browser.dto.response.ErrorResponseDto;
 import cz.zr.browser.dto.response.RowsResponseDto;
+import cz.zr.browser.dto.response.SchemasResponseDto;
 import cz.zr.browser.dto.response.TableDto;
 import cz.zr.browser.dto.response.TablesResponseDto;
 import cz.zr.browser.service.ConnectionService;
@@ -33,6 +34,26 @@ public class DbBrowserController {
   private final ConnectionService connectionService;
 
   private final DbBrowserService dbBrowserService;
+
+  /**
+   * Returns all available schemas of selected DB connection. Pagination, sorting and filtering is not supported.
+   */
+  @ApiOperation(value = "Returns all available schemas of selected DB connection. (Pagination, sorting and filtering is not supported.)",
+    nickname = "getSchemas")
+  @ApiResponses(value = {
+    @ApiResponse(code = 200, message = "Success", response = SchemasResponseDto.class),
+    @ApiResponse(code = 404, message = "Not found", response = ErrorResponseDto.class),
+    @ApiResponse(code = 500, message = "Internal server error", response = ErrorResponseDto.class)
+  })
+  @GetMapping(value = "/{id}/schemas", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  @ResponseStatus(value = HttpStatus.OK)
+  public SchemasResponseDto getSchemas(@ApiParam(value = "Id of selected DB connection.", required = true) @PathVariable Long id) {
+    log.info("REST GET /v1/connections/{}/schemas START", id);
+    ConnectionDto datasource = connectionService.getConnection(id);
+    SchemasResponseDto response = dbBrowserService.getSchemas(datasource);
+    log.info("REST GET /v1/connections/{}/schemas END, Response: {}", id, response);
+    return response;
+  }
 
   /**
    * Returns all available tables of selected DB connection. Pagination, sorting and filtering is not supported.

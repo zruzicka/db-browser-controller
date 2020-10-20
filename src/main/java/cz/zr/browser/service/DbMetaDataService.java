@@ -17,6 +17,17 @@ public class DbMetaDataService {
 
   private static final String COLUMN_TABLE_NAME = "TABLE_NAME";
 
+  public Collection<String> getSchemas(Connection connection) throws SQLException {
+    Collection<String> response = new ArrayList<>();
+    DatabaseMetaData databaseMetaData = connection.getMetaData();
+    ResultSet schemas = databaseMetaData.getCatalogs();
+    while (schemas.next()){
+      String tableSchema = schemas.getString(1);
+      response.add(tableSchema);
+    }
+    return response;
+  }
+
   public Collection<TableDto> getTables(Connection connection) throws SQLException {
     DatabaseMetaData databaseMetaData = connection.getMetaData();
     List<TableDto> response = new ArrayList<>();
@@ -42,5 +53,4 @@ public class DbMetaDataService {
     }
     return response;
   }
-
 }

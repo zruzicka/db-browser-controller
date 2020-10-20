@@ -35,7 +35,7 @@ public class ConnectionController {
 
   private final ConnectionService connectionService;
 
-  @ApiOperation(value = "Create connection", nickname = "postConnection")
+  @ApiOperation(value = "Creates new DB connection record.", nickname = "postConnection")
   @ApiResponses(value = {
     @ApiResponse(code = 201, message = "Registered", response = ConnectionDto.class),
     @ApiResponse(code = 400, message = "Bad request", response = ErrorResponseDto.class),
@@ -53,7 +53,7 @@ public class ConnectionController {
   /**
    * Returns all available connections. Pagination, sorting and filtering is not supported yet.
    */
-  @ApiOperation(value = "Returns all available connections. (Pagination, sorting and filtering is not supported yet.)", nickname = "getConnections")
+  @ApiOperation(value = "Returns all available DB connection records. (Pagination, sorting and filtering is not supported yet.)", nickname = "getConnections")
   @ApiResponses(value = {
     @ApiResponse(code = 200, message = "Success", response = ConnectionsResponseDto.class),
     @ApiResponse(code = 500, message = "Internal server error", response = ErrorResponseDto.class)
@@ -67,7 +67,7 @@ public class ConnectionController {
     return response;
   }
 
-  @ApiOperation(value = "Update connection", nickname = "updateConnection")
+  @ApiOperation(value = "Updates DB connection record.", nickname = "updateConnection")
   @ApiResponses(value = {
     @ApiResponse(code = 200, message = "Updated", response = ConnectionDto.class),
     @ApiResponse(code = 400, message = "Bad request", response = ErrorResponseDto.class),
@@ -85,7 +85,7 @@ public class ConnectionController {
     return response;
   }
 
-  @ApiOperation(value = "Delete connection", nickname = "deleteConnection")
+  @ApiOperation(value = "Deletes DB connection record.", nickname = "deleteConnection")
   @ApiResponses(value = {
     @ApiResponse(code = 204, message = "Deleted"),
     @ApiResponse(code = 404, message = "Not found", response = ErrorResponseDto.class),

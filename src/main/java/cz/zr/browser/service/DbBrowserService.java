@@ -5,6 +5,7 @@ import cz.zr.browser.dto.response.ColumnDto;
 import cz.zr.browser.dto.response.ColumnsResponseDto;
 import cz.zr.browser.dto.response.ConnectionDto;
 import cz.zr.browser.dto.response.RowsResponseDto;
+import cz.zr.browser.dto.response.SchemasResponseDto;
 import cz.zr.browser.dto.response.TableDto;
 import cz.zr.browser.dto.response.TablesResponseDto;
 import cz.zr.browser.exception.GenericInternalErrorException;
@@ -26,6 +27,17 @@ public class DbBrowserService {
 
   private final DbMetaDataService dbMetaDataService;
 
+  public SchemasResponseDto getSchemas(ConnectionDto datasource) {
+    SchemasResponseDto response = SchemasResponseDto.builder().build();
+    try {
+      Connection connection = DbConnection.getConnection(datasource);
+      response.getDatabaseSchemas().addAll(dbMetaDataService.getSchemas(connection));
+    } catch (SQLException e) {
+      logAndThrowStructureLoadingFailResponse(datasource, e);
+    }
+    return response;
+  }
+
   public TablesResponseDto getTables(ConnectionDto datasource) {
     Collection<TableDto> tables = null;
     try {
@@ -34,7 +46,7 @@ public class DbBrowserService {
     } catch (SQLException e) {
       logAndThrowStructureLoadingFailResponse(datasource, e);
     }
-    return TablesResponseDto.builder().tables(tables).build();
+    return TablesResponseDto.builder().tables(tables).databaseName(datasource.getDatabaseName()).build();
   }
 
   public ColumnsResponseDto getColumns(String tableName, ConnectionDto datasource) {
