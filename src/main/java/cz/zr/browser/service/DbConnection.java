@@ -1,9 +1,10 @@
 package cz.zr.browser.service;
 
 import cz.zr.browser.dto.response.ConnectionDto;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DbConnection {
@@ -14,12 +15,20 @@ public class DbConnection {
    * @throws SQLException
    * @throws ClassNotFoundException
    */
-  public static Connection getConnection(ConnectionDto source) throws SQLException, ClassNotFoundException {
-    Class.forName("com.mysql.cj.jdbc.Driver");
+  public static Connection getConnection(ConnectionDto source) throws SQLException {
+    return getDataSource(source).getConnection();
+  }
+
+  public static DataSource getDataSource(ConnectionDto source) {
+    DriverManagerDataSource dataSource = new DriverManagerDataSource();
+    dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
     String url = String.format("jdbc:mariadb://%s:%d/%s?useUnicode=yes;characterEncoding=UTF-8", source.getHostname(), source.getPort(), source.getDatabaseName());
     String username = source.getUsername();
     String password = source.getPassword();
-    return DriverManager.getConnection(url, username, password);
+    dataSource.setUrl(url);
+    dataSource.setUsername(username);
+    dataSource.setPassword(password);
+    return dataSource;
   }
 
 }

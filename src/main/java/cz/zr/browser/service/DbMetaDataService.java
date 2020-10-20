@@ -23,7 +23,7 @@ public class DbMetaDataService {
     ResultSet resultSet = databaseMetaData.getTables(null, null, null, new String[]{"TABLE"});
     while (resultSet.next()) {
       String tableName = resultSet.getString(COLUMN_TABLE_NAME);
-      response.add(TableDto.builder().name(tableName).build());
+      response.add(TableDto.builder().tableName(tableName).build());
     }
     return response;
   }

@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
@@ -13,11 +14,9 @@ import java.util.Map;
 @Builder
 @AllArgsConstructor
 @ApiModel
-public class TableDto {
+public class RowsResponseDto {
 
   @ApiModelProperty
-  private String tableName;
-
-  @ApiModelProperty(value = "Collection carries table rows. Each row is represented by Map<Key, Value> where Key represents columnName and Value is corresponding rowValue.")
-  private Collection<Map<String, Object>> rows;
+  @Builder.Default
+  private Collection<Map<String, Object>> rows = new ArrayList<>();
 }
