@@ -36,3 +36,4 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MariaDB103Dialect
     show-sql: true
+    open-in-view: false
