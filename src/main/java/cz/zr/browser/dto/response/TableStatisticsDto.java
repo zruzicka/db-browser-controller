@@ -12,7 +12,7 @@ import lombok.Data;
 @ApiModel
 public class TableStatisticsDto {
 
-  @ApiModelProperty
+  @ApiModelProperty(value = "Total amount of table records.")
   private Long recordsCount;
 
 }

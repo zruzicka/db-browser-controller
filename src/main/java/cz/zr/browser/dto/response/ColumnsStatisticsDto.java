@@ -12,13 +12,13 @@ import lombok.Data;
 @ApiModel
 public class ColumnsStatisticsDto {
 
-  @ApiModelProperty
+  @ApiModelProperty(value = "Minimal value of related column.")
   private String min;
 
-  @ApiModelProperty
+  @ApiModelProperty(value = "Maximal value of related column.")
   private String max;
 
-  @ApiModelProperty
+  @ApiModelProperty(value = "Average value of related column.")
   private String avg;
 
 }

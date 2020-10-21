@@ -2,7 +2,7 @@
 
 Basic MySQL database browser with REST API.
 
-## How to run 
+## How to run locally
 
 * Application can be started as SpringBoot application via `cz.zr.browser.Application`.
 * Starts with default port `8080` and `context-path: /db-browser-controller`.
@@ -41,3 +41,9 @@ HTTP| Endpoint | Description
 --|--|--
 GET | ​/db-browser-controller​/v1​/connections​/{id}​/tables​/{tableName}​/columns​/statistics | Returns statistics for each column of selected DB table within selected DB connection.
 GET | ​/db-browser-controller​/v1​/connections​/{id}​/tables​/{tableName}​/statistics | Returns statistics of selected DB table within selected DB connection.
+
+Available Columns Statistics
+* min, max, avg
+
+Available Table Statistics
+* recordsCount
