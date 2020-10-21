@@ -32,6 +32,10 @@ public class ConnectionService {
   public ConnectionsResponseDto getConnections() {
     List<ConnectionEntity> connections = connectionRepository.findAll();
     List<ConnectionDto> availableConnections = mapper.connectionEntityToConnectionResponseDto(connections);
+    // Password values shall not be provided in response.
+    // BE_AWARE/TO_DECIDE: Password String remains in memory until GC execution
+    // so if we want to prevent passwords capturing via memory dump, then characters array should be used and cleaned properly instead.
+    availableConnections.forEach(connection -> connection.setPassword(null));
     return ConnectionsResponseDto.builder().connections(availableConnections).build();
   }
 
