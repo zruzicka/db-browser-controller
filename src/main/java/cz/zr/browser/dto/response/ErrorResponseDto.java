@@ -18,7 +18,6 @@ public class ErrorResponseDto {
   private LocalDate timestamp;
   private Integer status;
   private String error;
-  private String exception;
   private String message;
   private String path;
   private Integer errorCode;

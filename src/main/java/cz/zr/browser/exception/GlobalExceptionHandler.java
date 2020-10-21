@@ -28,7 +28,6 @@ public class GlobalExceptionHandler {
   private ErrorResponseDto prepareErrorResponse(RestResponse restError, HttpServletRequest request,
                                                 HttpServletResponse response) {
     ErrorResponseDto errorResponse = restError.getErrorResponse();
-    errorResponse.setException(restError.getMessage());
     errorResponse.setPath(request.getServletPath());
     errorResponse.setStatus(restError.getStatus().value());
     errorResponse.setErrorCode(restError.getCode());

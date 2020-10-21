@@ -20,4 +20,7 @@ public class TableDto {
 
   @ApiModelProperty(value = "Collection carries table rows. Each row is represented by Map<Key, Value> where Key represents columnName and Value is corresponding rowValue.")
   private Collection<Map<String, Object>> rows;
+
+  @ApiModelProperty
+  private TableStatisticsDto statistics;
 }

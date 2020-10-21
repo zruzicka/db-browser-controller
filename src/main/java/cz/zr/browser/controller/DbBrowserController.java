@@ -6,6 +6,7 @@ import cz.zr.browser.dto.response.ErrorResponseDto;
 import cz.zr.browser.dto.response.RowsResponseDto;
 import cz.zr.browser.dto.response.SchemasResponseDto;
 import cz.zr.browser.dto.response.TableDto;
+import cz.zr.browser.dto.response.TableStatisticsDto;
 import cz.zr.browser.dto.response.TablesResponseDto;
 import cz.zr.browser.service.ConnectionService;
 import cz.zr.browser.service.DbBrowserService;
@@ -117,6 +118,51 @@ public class DbBrowserController {
     RowsResponseDto rowsResponse = dbBrowserService.getDataPreview(tableName, datasource);
     TableDto response = TableDto.builder().tableName(tableName).rows(rowsResponse.getRows()).build();
     log.info("REST GET /v1/connections/{}/tables/{}/preview END, Response: {}", id, tableName, rowsResponse);
+    return response;
+  }
+
+  /**
+   * Returns statistics of selected DB table within selected DB connection.
+   */
+  @ApiOperation(value = "Returns statistics of selected DB table within selected DB connection.",
+    nickname = "getTableStatistics")
+  @ApiResponses(value = {
+    @ApiResponse(code = 200, message = "Success", response = TableDto.class),
+    @ApiResponse(code = 404, message = "Not found", response = ErrorResponseDto.class),
+    @ApiResponse(code = 500, message = "Internal server error", response = ErrorResponseDto.class)
+  })
+  @GetMapping(value = "/{id}/tables/{tableName}/statistics", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  @ResponseStatus(value = HttpStatus.OK)
+  public TableDto getTableStatistics(
+    @ApiParam(value = "Id of selected DB connection.", required = true) @PathVariable Long id,
+    @ApiParam(value = "Selected table name.", required = true) @PathVariable String tableName) {
+    log.info("REST GET /v1/connections/{}/tables/{}/statistics START", id, tableName);
+    ConnectionDto datasource = connectionService.getConnection(id);
+    TableStatisticsDto statistics = dbBrowserService.getTableStatistics(tableName, datasource);
+    TableDto response = TableDto.builder().tableName(tableName).statistics(statistics).build();
+    log.info("REST GET /v1/connections/{}/tables/{}/statistics END", id, tableName);
+    return response;
+  }
+
+  /**
+   * Returns statistics for each column of selected DB table within selected DB connection.
+   */
+  @ApiOperation(value = "Returns statistics for each column of selected DB table within selected DB connection.",
+    nickname = "getColumnsStatistics")
+  @ApiResponses(value = {
+    @ApiResponse(code = 200, message = "Success", response = ColumnsResponseDto.class),
+    @ApiResponse(code = 404, message = "Not found", response = ErrorResponseDto.class),
+    @ApiResponse(code = 500, message = "Internal server error", response = ErrorResponseDto.class)
+  })
+  @GetMapping(value = "/{id}/tables/{tableName}/columns/statistics", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  @ResponseStatus(value = HttpStatus.OK)
+  public ColumnsResponseDto getColumnsStatistics(
+    @ApiParam(value = "Id of selected DB connection.", required = true) @PathVariable Long id,
+    @ApiParam(value = "Selected table name.", required = true) @PathVariable String tableName) {
+    log.info("REST GET /v1/connections/{}/tables/{}/columns/statistics START", id, tableName);
+    ConnectionDto datasource = connectionService.getConnection(id);
+    ColumnsResponseDto response = dbBrowserService.getColumnsStatistics(tableName, datasource);
+    log.info("REST GET /v1/connections/{}/tables/{}/columns/statistics END, Response: {}", id, tableName, response);
     return response;
   }
 }

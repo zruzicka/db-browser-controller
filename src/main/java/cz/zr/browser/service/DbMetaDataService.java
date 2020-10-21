@@ -1,9 +1,12 @@
 package cz.zr.browser.service;
 
 import cz.zr.browser.dto.response.ColumnDto;
+import cz.zr.browser.dto.response.ColumnsStatisticsDto;
 import cz.zr.browser.dto.response.TableDto;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -21,7 +24,7 @@ public class DbMetaDataService {
     Collection<String> response = new ArrayList<>();
     DatabaseMetaData databaseMetaData = connection.getMetaData();
     ResultSet schemas = databaseMetaData.getCatalogs();
-    while (schemas.next()){
+    while (schemas.next()) {
       String tableSchema = schemas.getString(1);
       response.add(tableSchema);
     }
@@ -39,17 +42,27 @@ public class DbMetaDataService {
     return response;
   }
 
-  public Collection<ColumnDto> getColumns(String tableName, Connection connection) throws SQLException {
-    DatabaseMetaData databaseMetaData = connection.getMetaData();
+  public Collection<ColumnDto> getColumns(String tableName, DataSource datasource, boolean calculateStatistics) throws SQLException {
+    DatabaseMetaData databaseMetaData = datasource.getConnection().getMetaData();
     List<ColumnDto> response = new ArrayList<>();
-    ResultSet columns = databaseMetaData.getColumns(null,null, tableName, null);
-    while(columns.next()) {
+    ResultSet columns = databaseMetaData.getColumns(null, null, tableName, null);
+    while (columns.next()) {
       String columnName = columns.getString("COLUMN_NAME");
       String columnSize = columns.getString("COLUMN_SIZE");
       String datatype = columns.getString("DATA_TYPE");
       String isNullable = columns.getString("IS_NULLABLE");
       String isAutoIncrement = columns.getString("IS_AUTOINCREMENT");
-      response.add(ColumnDto.builder().columnName(columnName).columnSize(columnSize).datatype(datatype).isNullable(isNullable).isAutoIncrement(isAutoIncrement).build());
+      ColumnDto.ColumnDtoBuilder builder = ColumnDto.builder();
+      if (calculateStatistics) {
+        // TODO evaluate statistics!
+        var jtm = new JdbcTemplate(datasource);
+        String sql = String.format("SELECT min(%s) FROM %s", columnName, tableName);
+        String min = jtm.queryForObject(sql, new Object[]{}, String.class);
+        ColumnsStatisticsDto statistics = ColumnsStatisticsDto.builder().min(min).build();
+        builder.statistics(statistics);
+      }
+      builder.columnName(columnName).columnSize(columnSize).datatype(datatype).isNullable(isNullable).isAutoIncrement(isAutoIncrement);
+      response.add(builder.build());
     }
     return response;
   }
