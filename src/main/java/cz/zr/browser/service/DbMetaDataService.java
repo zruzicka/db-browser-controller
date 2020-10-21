@@ -54,11 +54,15 @@ public class DbMetaDataService {
       String isAutoIncrement = columns.getString("IS_AUTOINCREMENT");
       ColumnDto.ColumnDtoBuilder builder = ColumnDto.builder();
       if (calculateStatistics) {
-        // TODO evaluate statistics!
-        var jtm = new JdbcTemplate(datasource);
-        String sql = String.format("SELECT min(%s) FROM %s", columnName, tableName);
-        String min = jtm.queryForObject(sql, new Object[]{}, String.class);
-        ColumnsStatisticsDto statistics = ColumnsStatisticsDto.builder().min(min).build();
+        var jdbcTemplate = new JdbcTemplate(datasource);
+        String sql = String.format("SELECT min(%s), max(%s), avg(%s) FROM %s", columnName, columnName, columnName, tableName);
+        ColumnsStatisticsDto statistics = jdbcTemplate.queryForObject(
+          sql, (rs, rowNum) ->
+            ColumnsStatisticsDto.builder()
+              .min(rs.getString(1))
+              .max(rs.getString(2))
+              .avg(rs.getString(3)).build()
+        );
         builder.statistics(statistics);
       }
       builder.columnName(columnName).columnSize(columnSize).datatype(datatype).isNullable(isNullable).isAutoIncrement(isAutoIncrement);
