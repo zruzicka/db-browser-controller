@@ -52,7 +52,7 @@ public class DbBrowserController {
     log.info("REST GET /v1/connections/{}/schemas START", id);
     ConnectionDto datasource = connectionService.getConnection(id);
     SchemasResponseDto response = dbBrowserService.getSchemas(datasource);
-    log.info("REST GET /v1/connections/{}/schemas END, Response: {}", id, response);
+    log.info("REST GET /v1/connections/{}/schemas END", id);
     return response;
   }
 
@@ -72,7 +72,7 @@ public class DbBrowserController {
     log.info("REST GET /v1/connections/{}/tables START", id);
     ConnectionDto datasource = connectionService.getConnection(id);
     TablesResponseDto response = dbBrowserService.getTables(datasource);
-    log.info("REST GET /v1/connections/{}/tables END, Response: {}", id, response);
+    log.info("REST GET /v1/connections/{}/tables END", id);
     return response;
   }
 
@@ -94,7 +94,7 @@ public class DbBrowserController {
     log.info("REST GET /v1/connections/{}/tables/{}/columns START", id, tableName);
     ConnectionDto datasource = connectionService.getConnection(id);
     ColumnsResponseDto response = dbBrowserService.getColumns(tableName, datasource);
-    log.info("REST GET /v1/connections/{}/tables/{}/columns END, Response: {}", id, tableName, response);
+    log.info("REST GET /v1/connections/{}/tables/{}/columns END", id, tableName);
     return response;
   }
 
@@ -117,7 +117,7 @@ public class DbBrowserController {
     ConnectionDto datasource = connectionService.getConnection(id);
     RowsResponseDto rowsResponse = dbBrowserService.getDataPreview(tableName, datasource);
     TableDto response = TableDto.builder().tableName(tableName).rows(rowsResponse.getRows()).build();
-    log.info("REST GET /v1/connections/{}/tables/{}/preview END, Response: {}", id, tableName, rowsResponse);
+    log.info("REST GET /v1/connections/{}/tables/{}/preview END", id, tableName);
     return response;
   }
 
@@ -162,7 +162,7 @@ public class DbBrowserController {
     log.info("REST GET /v1/connections/{}/tables/{}/columns/statistics START", id, tableName);
     ConnectionDto datasource = connectionService.getConnection(id);
     ColumnsResponseDto response = dbBrowserService.getColumnsStatistics(tableName, datasource);
-    log.info("REST GET /v1/connections/{}/tables/{}/columns/statistics END, Response: {}", id, tableName, response);
+    log.info("REST GET /v1/connections/{}/tables/{}/columns/statistics END", id, tableName);
     return response;
   }
 }

@@ -46,7 +46,7 @@ public class ConnectionController {
   public ConnectionDto postConnection(@Valid @RequestBody ConnectionRequestDto requestDTO) {
     log.info("REST POST /v1/connections START");
     ConnectionDto response = connectionService.createConnection(requestDTO);
-    log.info("REST POST /v1/connections END, Response: {}", response);
+    log.info("REST POST /v1/connections END");
     return response;
   }
 
@@ -63,7 +63,7 @@ public class ConnectionController {
   public ConnectionsResponseDto getConnections() {
     log.info("REST GET /v1/connections START");
     ConnectionsResponseDto response = connectionService.getConnections();
-    log.info("REST GET /v1/connections END, Response: {}", response);
+    log.info("REST GET /v1/connections END");
     return response;
   }
 
@@ -81,7 +81,7 @@ public class ConnectionController {
     @Valid @RequestBody ConnectionRequestDto requestDTO) {
     log.info("REST PUT /v1/connections START");
     ConnectionDto response = connectionService.updateConnection(id, requestDTO);
-    log.info("REST PUT /v1/connections END, Response: {}", response);
+    log.info("REST PUT /v1/connections END");
     return response;
   }
 
