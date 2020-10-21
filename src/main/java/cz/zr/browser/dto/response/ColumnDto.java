@@ -30,4 +30,7 @@ public class ColumnDto {
   @ApiModelProperty
   private String isAutoIncrement;
 
+  @ApiModelProperty
+  private ColumnsStatisticsDto statistics;
+
 }
