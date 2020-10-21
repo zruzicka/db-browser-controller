@@ -25,6 +25,7 @@ DELETE | ​/db-browser-controller​/v1​/connections​/{id} | Deletes DB con
 ### DB Browser Controller
 * Provides REST API for browsing structure and data using database connections stored via Connection Controller above.
 * Locally available at http://localhost:8080/db-browser-controller/swagger-ui/#/db-browser-controller.
+* Current API design does not allow to specify particular DB name or DB schema only via endpoint URL path. Applied `databaseName` is loaded from Connection record peristed via [Connection Controller](https://github.com/zruzicka/db-browser-controller#connection-controller). If you need to select particular `databaseName`, please select related Connection via connection `{id}` `PathVariable`.
 
 HTTP| Endpoint | Description
 --|--|--
