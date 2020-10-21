@@ -1,7 +1,7 @@
 package cz.zr.browser.controller;
 
 import cz.zr.browser.dto.request.ConnectionRequestDto;
-import cz.zr.browser.dto.response.ConnectionResponseDto;
+import cz.zr.browser.dto.response.ConnectionDto;
 import cz.zr.browser.dto.response.ConnectionsResponseDto;
 import cz.zr.browser.dto.response.ErrorResponseDto;
 import cz.zr.browser.service.ConnectionService;
@@ -35,25 +35,25 @@ public class ConnectionController {
 
   private final ConnectionService connectionService;
 
-  @ApiOperation(value = "Create connection", nickname = "postConnection")
+  @ApiOperation(value = "Creates new DB connection record.", nickname = "postConnection")
   @ApiResponses(value = {
-    @ApiResponse(code = 201, message = "Registered", response = ConnectionResponseDto.class),
+    @ApiResponse(code = 201, message = "Registered", response = ConnectionDto.class),
     @ApiResponse(code = 400, message = "Bad request", response = ErrorResponseDto.class),
     @ApiResponse(code = 500, message = "Internal server error", response = ErrorResponseDto.class)
   })
   @PostMapping(consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
   @ResponseStatus(value = HttpStatus.CREATED)
-  public ConnectionResponseDto postConnection(@Valid @RequestBody ConnectionRequestDto requestDTO) {
+  public ConnectionDto postConnection(@Valid @RequestBody ConnectionRequestDto requestDTO) {
     log.info("REST POST /v1/connections START");
-    ConnectionResponseDto response = connectionService.createConnection(requestDTO);
+    ConnectionDto response = connectionService.createConnection(requestDTO);
     log.info("REST POST /v1/connections END, Response: {}", response);
     return response;
   }
 
   /**
-   * Returns all available connections. Manual pagination, sorting and filtering is not supported yet.
+   * Returns all available connections. Pagination, sorting and filtering is not supported yet.
    */
-  @ApiOperation(value = "Returns all available connections. (Manual pagination, sorting and filtering is not supported yet.)", nickname = "getConnections")
+  @ApiOperation(value = "Returns all available DB connection records. (Pagination, sorting and filtering is not supported yet.)", nickname = "getConnections")
   @ApiResponses(value = {
     @ApiResponse(code = 200, message = "Success", response = ConnectionsResponseDto.class),
     @ApiResponse(code = 500, message = "Internal server error", response = ErrorResponseDto.class)
@@ -67,25 +67,25 @@ public class ConnectionController {
     return response;
   }
 
-  @ApiOperation(value = "Update connection", nickname = "updateConnection")
+  @ApiOperation(value = "Updates DB connection record.", nickname = "updateConnection")
   @ApiResponses(value = {
-    @ApiResponse(code = 200, message = "Updated", response = ConnectionResponseDto.class),
+    @ApiResponse(code = 200, message = "Updated", response = ConnectionDto.class),
     @ApiResponse(code = 400, message = "Bad request", response = ErrorResponseDto.class),
     @ApiResponse(code = 404, message = "Not found", response = ErrorResponseDto.class),
     @ApiResponse(code = 500, message = "Internal server error", response = ErrorResponseDto.class)
   })
   @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
   @ResponseStatus(value = HttpStatus.OK)
-  public ConnectionResponseDto updateConnection(
+  public ConnectionDto updateConnection(
     @ApiParam(value = "Id of updated connection.", required = true) @PathVariable Long id,
     @Valid @RequestBody ConnectionRequestDto requestDTO) {
     log.info("REST PUT /v1/connections START");
-    ConnectionResponseDto response = connectionService.updateConnection(id, requestDTO);
+    ConnectionDto response = connectionService.updateConnection(id, requestDTO);
     log.info("REST PUT /v1/connections END, Response: {}", response);
     return response;
   }
 
-  @ApiOperation(value = "Delete connection", nickname = "deleteConnection")
+  @ApiOperation(value = "Deletes DB connection record.", nickname = "deleteConnection")
   @ApiResponses(value = {
     @ApiResponse(code = 204, message = "Deleted"),
     @ApiResponse(code = 404, message = "Not found", response = ErrorResponseDto.class),

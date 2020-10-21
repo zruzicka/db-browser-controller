@@ -6,14 +6,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Collection;
 
 @Data
 @Builder
 @AllArgsConstructor
 @ApiModel
-public class ConnectionsResponseDto {
+public class SchemasResponseDto {
 
   @ApiModelProperty
-  private List<ConnectionDto> connections;
+  @Builder.Default
+  private Collection<String> databaseSchemas = new ArrayList<>();
 }

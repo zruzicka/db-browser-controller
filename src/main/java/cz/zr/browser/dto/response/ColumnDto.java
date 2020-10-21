@@ -6,35 +6,28 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.Date;
-
 @Data
 @Builder
 @AllArgsConstructor
 @ApiModel
-public class ConnectionResponseDto {
+public class ColumnDto {
 
   @ApiModelProperty
-  private Long id;
+  private TableDto table;
 
   @ApiModelProperty
-  private String name;
+  private String columnName;
 
   @ApiModelProperty
-  private String hostname;
+  private String columnSize;
 
   @ApiModelProperty
-  private Integer port;
+  private String datatype;
 
   @ApiModelProperty
-  private String databaseName;
+  private String isNullable;
 
   @ApiModelProperty
-  private String username;
+  private String isAutoIncrement;
 
-  @ApiModelProperty
-  private String password;
-
-  @ApiModelProperty
-  private Date createdAt;
 }

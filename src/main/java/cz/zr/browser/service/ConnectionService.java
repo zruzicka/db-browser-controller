@@ -2,7 +2,7 @@ package cz.zr.browser.service;
 
 import cz.zr.browser.RestResponse;
 import cz.zr.browser.dto.request.ConnectionRequestDto;
-import cz.zr.browser.dto.response.ConnectionResponseDto;
+import cz.zr.browser.dto.response.ConnectionDto;
 import cz.zr.browser.dto.response.ConnectionsResponseDto;
 import cz.zr.browser.entities.ConnectionEntity;
 import cz.zr.browser.exception.NotFoundException;
@@ -23,7 +23,7 @@ public class ConnectionService {
   private final ConnectionRepository connectionRepository;
 
   @Transactional
-  public ConnectionResponseDto createConnection(ConnectionRequestDto requestDTO) {
+  public ConnectionDto createConnection(ConnectionRequestDto requestDTO) {
     ConnectionEntity connection = mapper.connectionRequestToConnectionEntity(requestDTO);
     connection = connectionRepository.save(connection);
     return mapper.connectionEntityToConnectionResponseDto(connection);
@@ -31,12 +31,17 @@ public class ConnectionService {
 
   public ConnectionsResponseDto getConnections() {
     List<ConnectionEntity> connections = connectionRepository.findAll();
-    List<ConnectionResponseDto> availableConnections = mapper.connectionEntityToConnectionResponseDto(connections);
+    List<ConnectionDto> availableConnections = mapper.connectionEntityToConnectionResponseDto(connections);
     return ConnectionsResponseDto.builder().connections(availableConnections).build();
   }
 
+  public ConnectionDto getConnection(Long id) {
+    ConnectionEntity connection = findConnection(id);
+    return mapper.connectionEntityToConnectionResponseDto(connection);
+  }
+
   @Transactional
-  public ConnectionResponseDto updateConnection(Long id, ConnectionRequestDto requestDTO) {
+  public ConnectionDto updateConnection(Long id, ConnectionRequestDto requestDTO) {
     ConnectionEntity connection = findConnection(id);
     connection.setName(requestDTO.getName());
     connection.setDatabaseName(requestDTO.getDatabaseName());

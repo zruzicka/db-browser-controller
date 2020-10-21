@@ -8,13 +8,9 @@ import org.springframework.http.HttpStatus;
 
 public enum RestResponse {
 
-  OK(HttpStatus.OK, 200, "Success"),
-
   NOT_FOUND(HttpStatus.NOT_FOUND, 404, "Not found"),
-
-  FORBIDDEN_REQUEST(HttpStatus.FORBIDDEN, 403, "Request is not permitted based on provided/requested details."),
-
   INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 500, "Internal server error"),
+  DB_STRUCTURE_LOADING_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 50001, "DB structure loading failed."),
   ;
 
   private HttpStatus status;
