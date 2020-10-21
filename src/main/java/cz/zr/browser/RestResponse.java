@@ -11,6 +11,7 @@ public enum RestResponse {
   NOT_FOUND(HttpStatus.NOT_FOUND, 404, "Not found"),
   INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 500, "Internal server error"),
   DB_STRUCTURE_LOADING_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 50001, "DB structure or data loading failed."),
+  PASSWORD_ENCRYPTION_DECRYPTION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, 500, "Password encryption or decryption failed."),
   ;
 
   private HttpStatus status;

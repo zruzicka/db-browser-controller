@@ -37,4 +37,20 @@ public class ConnectionDto {
 
   @ApiModelProperty
   private Date createdAt;
+
+  /**
+   * Connection password is excluded.
+   */
+  @Override
+  public String toString() {
+    return "ConnectionDto{" +
+      "id=" + id +
+      ", name='" + name + '\'' +
+      ", hostname='" + hostname + '\'' +
+      ", port=" + port +
+      ", databaseName='" + databaseName + '\'' +
+      ", username='" + username + '\'' +
+      ", createdAt=" + createdAt +
+      '}';
+  }
 }

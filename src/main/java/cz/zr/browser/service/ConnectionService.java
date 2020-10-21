@@ -5,15 +5,26 @@ import cz.zr.browser.dto.request.ConnectionRequestDto;
 import cz.zr.browser.dto.response.ConnectionDto;
 import cz.zr.browser.dto.response.ConnectionsResponseDto;
 import cz.zr.browser.entities.ConnectionEntity;
+import cz.zr.browser.exception.GenericInternalErrorException;
+import cz.zr.browser.exception.GlobalExceptionHandler;
 import cz.zr.browser.exception.NotFoundException;
 import cz.zr.browser.mappers.GlobalMapper;
 import cz.zr.browser.repository.ConnectionRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.SecretKey;
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ConnectionService {
@@ -22,13 +33,33 @@ public class ConnectionService {
 
   private final ConnectionRepository connectionRepository;
 
+  private final CipherService cipherService;
+
+  private SecretKey secretKey;
+
+  @PostConstruct
+  public void init() throws UnsupportedEncodingException, NoSuchAlgorithmException {
+    secretKey = cipherService.createDefaultKey();
+  }
+
+  /**
+   * @return {@link ConnectionDto} excluding connection password.
+   */
   @Transactional
   public ConnectionDto createConnection(ConnectionRequestDto requestDTO) {
     ConnectionEntity connection = mapper.connectionRequestToConnectionEntity(requestDTO);
+    // TODO Apply salt usage.
+    connection.setPassword(encrypt(requestDTO.getPassword()));
     connection = connectionRepository.save(connection);
-    return mapper.connectionEntityToConnectionResponseDto(connection);
+    ConnectionDto connectionDto = mapper.connectionEntityToConnectionResponseDto(connection);
+    // Password value shall not be provided in response.
+    connectionDto.setPassword(null);
+    return connectionDto;
   }
 
+  /**
+   * @return {@link ConnectionsResponseDto} excluding connection passwords.
+   */
   public ConnectionsResponseDto getConnections() {
     List<ConnectionEntity> connections = connectionRepository.findAll();
     List<ConnectionDto> availableConnections = mapper.connectionEntityToConnectionResponseDto(connections);
@@ -39,9 +70,14 @@ public class ConnectionService {
     return ConnectionsResponseDto.builder().connections(availableConnections).build();
   }
 
+  /**
+   * @return {@link ConnectionDto} including connection password.
+   */
   public ConnectionDto getConnection(Long id) {
     ConnectionEntity connection = findConnection(id);
-    return mapper.connectionEntityToConnectionResponseDto(connection);
+    ConnectionDto connectionDto = mapper.connectionEntityToConnectionResponseDto(connection);
+    connectionDto.setPassword(decrypt(connectionDto.getPassword()));
+    return connectionDto;
   }
 
   @Transactional
@@ -65,5 +101,23 @@ public class ConnectionService {
 
   private ConnectionEntity findConnection(Long id) {
     return connectionRepository.findById(id).orElseThrow(() -> new NotFoundException(RestResponse.NOT_FOUND));
+  }
+
+  protected String decrypt(String encrypted) {
+    try {
+      return cipherService.decrypt(encrypted, secretKey);
+    } catch (BadPaddingException | IllegalBlockSizeException | InvalidKeyException e) {
+      log.error(GlobalExceptionHandler.getLogMessage(e), e);
+      throw new GenericInternalErrorException(RestResponse.PASSWORD_ENCRYPTION_DECRYPTION_FAILED);
+    }
+  }
+
+  protected String encrypt(String plainText) {
+    try {
+      return cipherService.encrypt(plainText, secretKey);
+    } catch (BadPaddingException | IllegalBlockSizeException | InvalidKeyException e) {
+      log.error(GlobalExceptionHandler.getLogMessage(e), e);
+      throw new GenericInternalErrorException(RestResponse.PASSWORD_ENCRYPTION_DECRYPTION_FAILED);
+    }
   }
 }
