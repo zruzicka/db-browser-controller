@@ -6,9 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Range;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 
 @Data
 @Builder
@@ -26,7 +26,7 @@ public class ConnectionRequestDto {
   private String hostname;
 
   @NotNull
-  @Size(max = 65535)
+  @Range(min=0, max=65535)
   @ApiModelProperty(required = true)
   private Integer port;
 
