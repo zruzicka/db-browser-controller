@@ -15,13 +15,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.SecretKey;
 import java.io.UnsupportedEncodingException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 
 @Slf4j
@@ -34,28 +34,6 @@ public class ConnectionService {
   private final ConnectionRepository connectionRepository;
 
   private final CipherService cipherService;
-
-  private SecretKey secretKey;
-
-  @PostConstruct
-  public void init() throws UnsupportedEncodingException, NoSuchAlgorithmException {
-    secretKey = cipherService.createDefaultKey();
-  }
-
-  /**
-   * @return {@link ConnectionDto} excluding connection password.
-   */
-  @Transactional
-  public ConnectionDto createConnection(ConnectionRequestDto requestDTO) {
-    ConnectionEntity connection = mapper.connectionRequestToConnectionEntity(requestDTO);
-    // TODO Apply salt usage.
-    connection.setPassword(encrypt(requestDTO.getPassword()));
-    connection = connectionRepository.save(connection);
-    ConnectionDto connectionDto = mapper.connectionEntityToConnectionResponseDto(connection);
-    // Password value shall not be provided in response.
-    connectionDto.setPassword(null);
-    return connectionDto;
-  }
 
   /**
    * @return {@link ConnectionsResponseDto} excluding connection passwords.
@@ -71,12 +49,29 @@ public class ConnectionService {
   }
 
   /**
+   * @return {@link ConnectionDto} excluding connection password.
+   */
+  @Transactional
+  public ConnectionDto createConnection(ConnectionRequestDto requestDTO) {
+    ConnectionEntity connection = mapper.connectionRequestToConnectionEntity(requestDTO);
+    // TODO Add and use new salt field.
+    String salt = cipherService.getRandomSalt();
+    connection.setName(salt);
+    connection.setPassword(encrypt(requestDTO.getPassword(), salt));
+    connection = connectionRepository.save(connection);
+    ConnectionDto connectionDto = mapper.connectionEntityToConnectionResponseDto(connection);
+    // Password value shall not be provided in response.
+    connectionDto.setPassword(null);
+    return connectionDto;
+  }
+
+  /**
    * @return {@link ConnectionDto} including connection password.
    */
   public ConnectionDto getConnection(Long id) {
     ConnectionEntity connection = findConnection(id);
     ConnectionDto connectionDto = mapper.connectionEntityToConnectionResponseDto(connection);
-    connectionDto.setPassword(decrypt(connectionDto.getPassword()));
+    connectionDto.setPassword(decrypt(connectionDto.getPassword(), connectionDto.getName()));
     return connectionDto;
   }
 
@@ -103,19 +98,19 @@ public class ConnectionService {
     return connectionRepository.findById(id).orElseThrow(() -> new NotFoundException(RestResponse.NOT_FOUND));
   }
 
-  protected String decrypt(String encrypted) {
+  protected String decrypt(String encrypted, String salt) {
     try {
-      return cipherService.decrypt(encrypted, secretKey);
-    } catch (BadPaddingException | IllegalBlockSizeException | InvalidKeyException e) {
+      return cipherService.decrypt(encrypted, salt);
+    } catch (BadPaddingException | IllegalBlockSizeException | InvalidKeyException | UnsupportedEncodingException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException e) {
       log.error(GlobalExceptionHandler.getLogMessage(e), e);
       throw new GenericInternalErrorException(RestResponse.PASSWORD_ENCRYPTION_DECRYPTION_FAILED);
     }
   }
 
-  protected String encrypt(String plainText) {
+  protected String encrypt(String plainText, String salt) {
     try {
-      return cipherService.encrypt(plainText, secretKey);
-    } catch (BadPaddingException | IllegalBlockSizeException | InvalidKeyException e) {
+      return cipherService.encrypt(plainText, salt);
+    } catch (BadPaddingException | IllegalBlockSizeException | InvalidKeyException | UnsupportedEncodingException | NoSuchAlgorithmException | InvalidKeySpecException | InvalidAlgorithmParameterException e) {
       log.error(GlobalExceptionHandler.getLogMessage(e), e);
       throw new GenericInternalErrorException(RestResponse.PASSWORD_ENCRYPTION_DECRYPTION_FAILED);
     }

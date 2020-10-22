@@ -5,51 +5,55 @@ import org.springframework.stereotype.Service;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.util.Random;
 
 @Service
 public class CipherService {
 
-  private static String HASH_ALGORITHM = "SHA-256";
-  private static String ENCRYPTION_ALGORITHM = "AES";
+  private static String SECRET_KEY_ALGORITHM = "AES";
   private static Charset TEXT_ENCODING = StandardCharsets.UTF_8;
 
-  /** The key is applied for default SecretKey generation. */
-  private static String CIPHER_SERVICE_KEY = "CF7A0B20371D906E8D0919DCB1EB1A1E243693BA";
+  /** Token is applied while deriving SecretKeySpec. */
+  private static String TOKEN = "CF7A0B20371D906E8D0919DCB1EB1A1E243693BA";
 
-  private static final int KEY_SIZE_IN_BYTES = 16;
-  private static final int KEY_SIZE_IN_BITS = 128;
+  private static final int KEY_SIZE = 256;
+  private static final int KEY_CALCULATION_ITERATIONS = 65535;
 
   private final Cipher cipher;
 
 
   public CipherService() throws NoSuchPaddingException, NoSuchAlgorithmException {
-    cipher = Cipher.getInstance(ENCRYPTION_ALGORITHM);
+    cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
   }
 
   /**
    * Given text is encrypted based on given key and returned in Base64 encoding.
    * @param plainText
-   * @param key
+   * @param salt
    * @return
    * @throws BadPaddingException
    * @throws IllegalBlockSizeException
    * @throws InvalidKeyException
    */
-  public String encrypt(String plainText, SecretKey key) throws BadPaddingException, IllegalBlockSizeException, InvalidKeyException {
+  public String encrypt(String plainText, String salt) throws BadPaddingException, IllegalBlockSizeException, InvalidKeyException, UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException {
+    SecretKeySpec secret = deriveSecretKey(salt);
     byte[] plainTextByte = plainText.getBytes(TEXT_ENCODING);
-    cipher.init(Cipher.ENCRYPT_MODE, key);
+    cipher.init(Cipher.ENCRYPT_MODE, secret, new IvParameterSpec(new byte[16]));
     byte[] encryptedByte = cipher.doFinal(plainTextByte);
     return DatatypeConverter.printBase64Binary(encryptedByte);
   }
@@ -57,56 +61,41 @@ public class CipherService {
   /**
    * Given encrypted text is decoded from Base64 encoding and decrypted by given key.
    * @param encryptedText
-   * @param key
+   * @param salt
    * @return
    * @throws BadPaddingException
    * @throws IllegalBlockSizeException
    * @throws InvalidKeyException
    */
-  public String decrypt(String encryptedText, SecretKey key) throws BadPaddingException, IllegalBlockSizeException, InvalidKeyException {
+  public String decrypt(String encryptedText, String salt) throws BadPaddingException, IllegalBlockSizeException, InvalidKeyException, UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeySpecException, InvalidAlgorithmParameterException {
     byte[] decoded = DatatypeConverter.parseBase64Binary(encryptedText);
-    cipher.init(Cipher.DECRYPT_MODE, key);
+    SecretKeySpec secret = deriveSecretKey(salt);
+    cipher.init(Cipher.DECRYPT_MODE, secret, new IvParameterSpec(new byte[16]));
     byte[] decryptedByte = cipher.doFinal(decoded);
     return new String(decryptedByte, TEXT_ENCODING);
   }
 
-  /**
-   * Generates random SecretKey.
-   * @return
-   * @throws NoSuchAlgorithmException
-   */
-  public static SecretKey generateSecretKey() throws NoSuchAlgorithmException {
-    KeyGenerator keyGenerator = KeyGenerator.getInstance(ENCRYPTION_ALGORITHM);
-    keyGenerator.init(KEY_SIZE_IN_BITS);
-    SecretKey secretKey = keyGenerator.generateKey();
-    return secretKey;
+  private SecretKeySpec deriveSecretKey(String salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    byte[] saltBytes = salt.getBytes(TEXT_ENCODING);
+    SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+    PBEKeySpec spec = new PBEKeySpec(
+      TOKEN.toCharArray(),
+      saltBytes,
+      KEY_CALCULATION_ITERATIONS,
+      KEY_SIZE
+    );
+    SecretKey secretKey = factory.generateSecret(spec);
+    return new SecretKeySpec(secretKey.getEncoded(), SECRET_KEY_ALGORITHM);
   }
 
-  /**
-   * Generates SecretKey based on givenKey.
-   * @param givenKey
-   * @return
-   * @throws UnsupportedEncodingException
-   * @throws NoSuchAlgorithmException
-   */
-  public static SecretKey createSecretKey(String givenKey) throws UnsupportedEncodingException, NoSuchAlgorithmException {
-    SecretKey secretKey;
-    byte[] key = givenKey.getBytes(TEXT_ENCODING);
-    MessageDigest sha = MessageDigest.getInstance(HASH_ALGORITHM);
-    key = sha.digest(key);
-    key = Arrays.copyOf(key, KEY_SIZE_IN_BYTES);
-    secretKey = new SecretKeySpec(key, ENCRYPTION_ALGORITHM);
-    return secretKey;
+  public String generateSalt(){
+    SecureRandom random = new SecureRandom();
+    byte bytes[] = new byte[16];
+    random.nextBytes(bytes);
+    return new String(bytes, TEXT_ENCODING);
   }
 
-  /**
-   * Generates SecretKey based on default key defined in service.
-   * @return
-   * @throws UnsupportedEncodingException
-   * @throws NoSuchAlgorithmException
-   */
-  public SecretKey createDefaultKey() throws UnsupportedEncodingException, NoSuchAlgorithmException {
-    return createSecretKey(CIPHER_SERVICE_KEY);
+  public String getRandomSalt(){
+    return String.valueOf(new Random().nextLong());
   }
-
 }
