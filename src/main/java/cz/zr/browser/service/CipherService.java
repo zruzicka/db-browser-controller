@@ -18,7 +18,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Random;
 
@@ -86,13 +85,6 @@ public class CipherService {
     );
     SecretKey secretKey = factory.generateSecret(spec);
     return new SecretKeySpec(secretKey.getEncoded(), SECRET_KEY_ALGORITHM);
-  }
-
-  public String generateSalt(){
-    SecureRandom random = new SecureRandom();
-    byte bytes[] = new byte[16];
-    random.nextBytes(bytes);
-    return new String(bytes, TEXT_ENCODING);
   }
 
   public String getRandomSalt(){

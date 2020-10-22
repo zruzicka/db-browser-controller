@@ -49,6 +49,9 @@ public class ConnectionEntity {
   @Column(nullable = false)
   private String password;
 
+  @Column
+  private String salt;
+
   @Temporal(TemporalType.TIMESTAMP)
   @CreationTimestamp
   @Column(nullable = false)

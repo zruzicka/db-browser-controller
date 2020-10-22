@@ -8,5 +8,8 @@
   <changeSet author="zr" id="20201020-zr-1" failOnError="true">
     <sqlFile path="init/structure.sql" encoding="utf8" relativeToChangelogFile="true"/>
   </changeSet>
+  <changeSet author="zbynek.ruzicka" id="20201022-zr-1" failOnError="true">
+    <sqlFile path="inc/20201022-zr-1_issue-11.sql" encoding="utf8" relativeToChangelogFile="true"/>
+  </changeSet>
 
 </databaseChangeLog>

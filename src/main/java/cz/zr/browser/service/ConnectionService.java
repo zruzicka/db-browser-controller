@@ -54,9 +54,8 @@ public class ConnectionService {
   @Transactional
   public ConnectionDto createConnection(ConnectionRequestDto requestDTO) {
     ConnectionEntity connection = mapper.connectionRequestToConnectionEntity(requestDTO);
-    // TODO Add and use new salt field.
     String salt = cipherService.getRandomSalt();
-    connection.setName(salt);
+    connection.setSalt(salt);
     connection.setPassword(encrypt(requestDTO.getPassword(), salt));
     connection = connectionRepository.save(connection);
     ConnectionDto connectionDto = mapper.connectionEntityToConnectionResponseDto(connection);
@@ -71,7 +70,7 @@ public class ConnectionService {
   public ConnectionDto getConnection(Long id) {
     ConnectionEntity connection = findConnection(id);
     ConnectionDto connectionDto = mapper.connectionEntityToConnectionResponseDto(connection);
-    connectionDto.setPassword(decrypt(connectionDto.getPassword(), connectionDto.getName()));
+    connectionDto.setPassword(decrypt(connectionDto.getPassword(), connection.getSalt()));
     return connectionDto;
   }
 
