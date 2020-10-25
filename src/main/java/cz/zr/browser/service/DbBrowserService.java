@@ -87,7 +87,7 @@ public class DbBrowserService {
     throw new GenericInternalErrorException(RestResponse.DB_STRUCTURE_LOADING_FAILED);
   }
 
-  public TableStatisticsDto getTableStatistics(String tableName, ConnectionDto datasource) {
+  public TableStatisticsDto getTableStatistics(String tableName, String schemaName, ConnectionDto datasource) {
     Long recordsCount = null;
     Long columnsCount = null;
     try {
@@ -95,7 +95,7 @@ public class DbBrowserService {
       recordsCount = queryForLong(datasource, sql);
 
       sql = "SELECT COUNT(*) AS `columns` FROM `information_schema`.`columns` WHERE " +
-        /*"`table_schema` = '"+table_schema+"' AND " +*/ // FIXME, table_schema usage is where clause is mandatory for resutls correctness!
+        "`table_schema` = '"+schemaName+"' AND " +
         "`table_name` =  '" + tableName +"';";
       columnsCount = queryForLong(datasource, sql);
     } catch (DataAccessException e) {

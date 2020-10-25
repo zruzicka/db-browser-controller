@@ -40,10 +40,13 @@ GET | ​/db-browser-controller​/v1​/connections​/{id}​/tables​/{table
 HTTP| Endpoint | Description
 --|--|--
 GET | ​/db-browser-controller​/v1​/connections​/{id}​/tables​/{tableName}​/columns​/statistics | Returns statistics for each column of selected DB table within selected DB connection.
-GET | ​/db-browser-controller​/v1​/connections​/{id}​/tables​/{tableName}​/statistics | Returns statistics of selected DB table within selected DB connection.
+GET | ​/db-browser-controller​/v1​/connections​/{id}​/schemas/{schemaName}/tables​/{tableName}​/statistics | Returns statistics of selected DB table within selected DB connection.
 
 Available Columns Statistics
-* min, max, avg
+* min 
+* max 
+* avg
 
 Available Table Statistics
 * recordsCount
+* columnsCount

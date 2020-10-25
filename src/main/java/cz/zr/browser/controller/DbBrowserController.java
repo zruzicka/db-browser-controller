@@ -131,16 +131,17 @@ public class DbBrowserController {
     @ApiResponse(code = 404, message = "Not found", response = ErrorResponseDto.class),
     @ApiResponse(code = 500, message = "Internal server error", response = ErrorResponseDto.class)
   })
-  @GetMapping(value = "/{id}/tables/{tableName}/statistics", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+  @GetMapping(value = "/{id}/schemas/{schemaName}/tables/{tableName}/statistics", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
   @ResponseStatus(value = HttpStatus.OK)
   public TableDto getTableStatistics(
     @ApiParam(value = "Id of selected DB connection.", required = true) @PathVariable Long id,
+    @ApiParam(value = "Selected schema name.", required = true) @PathVariable String schemaName,
     @ApiParam(value = "Selected table name.", required = true) @PathVariable String tableName) {
-    log.info("REST GET /v1/connections/{}/tables/{}/statistics START", id, tableName);
+    log.info("REST GET /v1/connections/{}/schemas/{}/tables/{}/statistics START", id, schemaName, tableName);
     ConnectionDto datasource = connectionService.getConnection(id);
-    TableStatisticsDto statistics = dbBrowserService.getTableStatistics(tableName, datasource);
+    TableStatisticsDto statistics = dbBrowserService.getTableStatistics(tableName, schemaName, datasource);
     TableDto response = TableDto.builder().tableName(tableName).statistics(statistics).build();
-    log.info("REST GET /v1/connections/{}/tables/{}/statistics END", id, tableName);
+    log.info("REST GET /v1/connections/{}/schemas/{}/tables/{}/statistics END", id, schemaName, tableName);
     return response;
   }
 
