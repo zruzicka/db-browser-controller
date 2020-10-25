@@ -89,14 +89,24 @@ public class DbBrowserService {
 
   public TableStatisticsDto getTableStatistics(String tableName, ConnectionDto datasource) {
     Long recordsCount = null;
+    Long columnsCount = null;
     try {
-      var jtm = new JdbcTemplate(DbConnection.getDataSource(datasource));
       String sql = "SELECT count(*) FROM " + tableName;
-      recordsCount = jtm.queryForObject(sql, new Object[] {}, Long.class);
+      recordsCount = queryForLong(datasource, sql);
+
+      sql = "SELECT COUNT(*) AS `columns` FROM `information_schema`.`columns` WHERE " +
+        /*"`table_schema` = '"+table_schema+"' AND " +*/ // FIXME, table_schema usage is where clause is mandatory for resutls correctness!
+        "`table_name` =  '" + tableName +"';";
+      columnsCount = queryForLong(datasource, sql);
     } catch (DataAccessException e) {
       logAndThrowStructureLoadingFailResponse(datasource, e);
     }
-    return TableStatisticsDto.builder().recordsCount(recordsCount).build();
+    return TableStatisticsDto.builder().recordsCount(recordsCount).columnsCount(columnsCount).build();
+  }
+
+  private Long queryForLong(ConnectionDto datasource, String sqlQuery) {
+    var jtm = new JdbcTemplate(DbConnection.getDataSource(datasource));
+    return jtm.queryForObject(sqlQuery, new Object[] {}, Long.class);
   }
 
   public ColumnsResponseDto getColumnsStatistics(String tableName, ConnectionDto datasource) {

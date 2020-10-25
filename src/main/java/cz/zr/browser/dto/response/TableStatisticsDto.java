@@ -15,4 +15,7 @@ public class TableStatisticsDto {
   @ApiModelProperty(value = "Total amount of table records.")
   private Long recordsCount;
 
+  @ApiModelProperty(value = "Total amount of columns in table records.")
+  private Long columnsCount;
+
 }
