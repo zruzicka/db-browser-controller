@@ -11,6 +11,7 @@ import cz.zr.browser.dto.response.TableStatisticsDto;
 import cz.zr.browser.dto.response.TablesResponseDto;
 import cz.zr.browser.exception.GenericInternalErrorException;
 import cz.zr.browser.exception.GlobalExceptionHandler;
+import cz.zr.browser.utils.DbConnection;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
@@ -31,8 +32,7 @@ public class DbBrowserService {
 
   public SchemasResponseDto getSchemas(ConnectionDto datasource) {
     SchemasResponseDto response = SchemasResponseDto.builder().build();
-    try {
-      Connection connection = DbConnection.getConnection(datasource);
+    try (Connection connection = DbConnection.getConnection(datasource)){
       response.getDatabaseSchemas().addAll(dbMetaDataService.getSchemas(connection));
     } catch (SQLException e) {
       logAndThrowStructureLoadingFailResponse(datasource, e);
@@ -42,8 +42,7 @@ public class DbBrowserService {
 
   public TablesResponseDto getTables(ConnectionDto datasource) {
     Collection<TableDto> tables = null;
-    try {
-      Connection connection = DbConnection.getConnection(datasource);
+    try (Connection connection = DbConnection.getConnection(datasource)){
       tables = dbMetaDataService.getTables(connection);
     } catch (SQLException e) {
       logAndThrowStructureLoadingFailResponse(datasource, e);
@@ -91,20 +90,20 @@ public class DbBrowserService {
     Long recordsCount = null;
     Long columnsCount = null;
     try {
-      String sql = "SELECT count(*) FROM " + tableName;
-      recordsCount = queryForLong(datasource, sql);
+      String recordsCountQuery = "SELECT count(*) FROM " + tableName;
+      recordsCount = queryForLong(recordsCountQuery, datasource);
 
-      sql = "SELECT COUNT(*) AS `columns` FROM `information_schema`.`columns` WHERE " +
-        "`table_schema` = '"+schemaName+"' AND " +
-        "`table_name` =  '" + tableName +"';";
-      columnsCount = queryForLong(datasource, sql);
+      String columnsCountQuery = "SELECT COUNT(*) AS `columns` FROM `information_schema`.`columns` WHERE " +
+        "`table_schema` = '" + schemaName + "' AND " +
+        "`table_name` =  '" + tableName + "';";
+      columnsCount = queryForLong(columnsCountQuery, datasource);
     } catch (DataAccessException e) {
       logAndThrowStructureLoadingFailResponse(datasource, e);
     }
     return TableStatisticsDto.builder().recordsCount(recordsCount).columnsCount(columnsCount).build();
   }
 
-  private Long queryForLong(ConnectionDto datasource, String sqlQuery) {
+  private Long queryForLong(String sqlQuery, ConnectionDto datasource) {
     var jtm = new JdbcTemplate(DbConnection.getDataSource(datasource));
     return jtm.queryForObject(sqlQuery, new Object[] {}, Long.class);
   }

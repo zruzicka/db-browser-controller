@@ -1,4 +1,4 @@
-package cz.zr.browser.service;
+package cz.zr.browser.utils;
 
 import cz.zr.browser.dto.response.ConnectionDto;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -7,6 +7,9 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * Provides DB {@link Connection} and {@link DataSource}.
+ */
 public class DbConnection {
 
   /**

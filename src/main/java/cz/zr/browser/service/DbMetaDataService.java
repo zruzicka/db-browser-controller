@@ -75,18 +75,13 @@ public class DbMetaDataService {
 
   private String calculateColumnMedian(String tableName, String columnName, DataSource datasource) {
     String medianRowIndexQuery = "SELECT CEIL(COUNT(*)/2) FROM " + tableName;
-    Long medianRowIndex = queryForLong(datasource, medianRowIndexQuery);
+    Long medianRowIndex = queryFor(medianRowIndexQuery, Long.class, datasource);
     String medianSql = "SELECT max("+ columnName +") FROM (SELECT "+ columnName +" FROM "+ tableName +" ORDER BY "+ columnName +" limit "+medianRowIndex+") median;";
-    return queryForString(datasource, medianSql);
+    return queryFor(medianSql, String.class, datasource);
   }
 
-  private Long queryForLong(DataSource datasource, String sqlQuery) {
+  private <T> T queryFor(String sqlQuery, Class<T> requiredType, DataSource datasource) {
     var jtm = new JdbcTemplate(datasource);
-    return jtm.queryForObject(sqlQuery, new Object[] {}, Long.class);
-  }
-
-  private String queryForString(DataSource datasource, String sqlQuery) {
-    var jtm = new JdbcTemplate(datasource);
-    return jtm.queryForObject(sqlQuery, new Object[] {}, String.class);
+    return jtm.queryForObject(sqlQuery, new Object[] {}, requiredType);
   }
 }

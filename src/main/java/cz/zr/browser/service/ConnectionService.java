@@ -38,6 +38,7 @@ public class ConnectionService {
   /**
    * @return {@link ConnectionsResponseDto} excluding connection passwords.
    */
+  @Transactional(readOnly = true)
   public ConnectionsResponseDto getConnections() {
     List<ConnectionEntity> connections = connectionRepository.findAll();
     List<ConnectionDto> availableConnections = mapper.connectionEntityToConnectionResponseDto(connections);
@@ -67,6 +68,7 @@ public class ConnectionService {
   /**
    * @return {@link ConnectionDto} including connection password.
    */
+  @Transactional(readOnly = true)
   public ConnectionDto getConnection(Long id) {
     ConnectionEntity connection = findConnection(id);
     ConnectionDto connectionDto = mapper.connectionEntityToConnectionResponseDto(connection);
