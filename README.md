@@ -46,6 +46,7 @@ Available Columns Statistics
 * min 
 * max 
 * avg
+* median
 
 Available Table Statistics
 * recordsCount

@@ -21,4 +21,7 @@ public class ColumnsStatisticsDto {
   @ApiModelProperty(value = "Average value of related column.")
   private String avg;
 
+  @ApiModelProperty(value = "Median value of related column.")
+  private String median;
+
 }

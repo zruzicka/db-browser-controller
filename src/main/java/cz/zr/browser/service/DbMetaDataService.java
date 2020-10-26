@@ -2,6 +2,7 @@ package cz.zr.browser.service;
 
 import cz.zr.browser.dto.response.ColumnDto;
 import cz.zr.browser.dto.response.ColumnsStatisticsDto;
+import cz.zr.browser.dto.response.ColumnsStatisticsDto.ColumnsStatisticsDtoBuilder;
 import cz.zr.browser.dto.response.TableDto;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -49,25 +50,43 @@ public class DbMetaDataService {
     while (columns.next()) {
       String columnName = columns.getString("COLUMN_NAME");
       String columnSize = columns.getString("COLUMN_SIZE");
-      String datatype = columns.getString("DATA_TYPE");
+      String datatype = columns.getString("DATA_TYPE"); // TODO provide value mapping to human-friendly and meaningful String/Enum.
       String isNullable = columns.getString("IS_NULLABLE");
       String isAutoIncrement = columns.getString("IS_AUTOINCREMENT");
       ColumnDto.ColumnDtoBuilder builder = ColumnDto.builder();
       if (calculateStatistics) {
         var jdbcTemplate = new JdbcTemplate(datasource);
         String sql = String.format("SELECT min(%s), max(%s), avg(%s) FROM %s", columnName, columnName, columnName, tableName);
-        ColumnsStatisticsDto statistics = jdbcTemplate.queryForObject(
+        ColumnsStatisticsDtoBuilder statisticsBuilder = jdbcTemplate.queryForObject(
           sql, (rs, rowNum) ->
             ColumnsStatisticsDto.builder()
               .min(rs.getString(1))
               .max(rs.getString(2))
-              .avg(rs.getString(3)).build()
+              .avg(rs.getString(3))
         );
-        builder.statistics(statistics);
+        statisticsBuilder.median(calculateColumnMedian(tableName, columnName, datasource));
+        builder.statistics(statisticsBuilder.build());
       }
       builder.columnName(columnName).columnSize(columnSize).datatype(datatype).isNullable(isNullable).isAutoIncrement(isAutoIncrement);
       response.add(builder.build());
     }
     return response;
+  }
+
+  private String calculateColumnMedian(String tableName, String columnName, DataSource datasource) {
+    String medianRowIndexQuery = "SELECT CEIL(COUNT(*)/2) FROM " + tableName;
+    Long medianRowIndex = queryForLong(datasource, medianRowIndexQuery);
+    String medianSql = "SELECT max("+ columnName +") FROM (SELECT "+ columnName +" FROM "+ tableName +" ORDER BY "+ columnName +" limit "+medianRowIndex+") median;";
+    return queryForString(datasource, medianSql);
+  }
+
+  private Long queryForLong(DataSource datasource, String sqlQuery) {
+    var jtm = new JdbcTemplate(datasource);
+    return jtm.queryForObject(sqlQuery, new Object[] {}, Long.class);
+  }
+
+  private String queryForString(DataSource datasource, String sqlQuery) {
+    var jtm = new JdbcTemplate(datasource);
+    return jtm.queryForObject(sqlQuery, new Object[] {}, String.class);
   }
 }
