@@ -74,9 +74,14 @@ public class DbMetaDataService {
   }
 
   private String calculateColumnMedian(String tableName, String columnName, DataSource datasource) {
-    String medianRowIndexQuery = "SELECT CEIL(COUNT(*)/2) FROM " + tableName;
-    Long medianRowIndex = queryFor(medianRowIndexQuery, Long.class, datasource);
-    String medianSql = "SELECT max("+ columnName +") FROM (SELECT "+ columnName +" FROM "+ tableName +" ORDER BY "+ columnName +" limit "+medianRowIndex+") median;";
+    String medianSql = "SELECT AVG(dd." + columnName + ") as Median\n" +
+      "FROM (\n" +
+      "SELECT d." + columnName + ", @rownum:=@rownum+1 as `row_number`, @total_rows:=@rownum\n" +
+      "  FROM " + tableName + " d, (SELECT @rownum:=0) r\n" +
+      "  WHERE d." + columnName + " is NOT NULL\n" +
+      "  ORDER BY d." + columnName + "\n" +
+      ") as dd\n" +
+      "WHERE dd.row_number IN ( FLOOR((@total_rows+1)/2), FLOOR((@total_rows+2)/2) );";
     return queryFor(medianSql, String.class, datasource);
   }
 
