@@ -8,6 +8,7 @@ import cz.zr.browser.dto.response.RowsResponseDto;
 import cz.zr.browser.dto.response.SchemasResponseDto;
 import cz.zr.browser.dto.response.TableDto;
 import cz.zr.browser.dto.response.TableStatisticsDto;
+import cz.zr.browser.dto.response.TableStatisticsDto.TableStatisticsDtoBuilder;
 import cz.zr.browser.dto.response.TablesResponseDto;
 import cz.zr.browser.exception.GenericInternalErrorException;
 import cz.zr.browser.exception.GlobalExceptionHandler;
@@ -16,7 +17,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -30,86 +33,97 @@ public class DbBrowserService {
 
   private final DbMetaDataService dbMetaDataService;
 
-  public SchemasResponseDto getSchemas(ConnectionDto datasource) {
+  public SchemasResponseDto getSchemas(ConnectionDto connectionDto) {
     SchemasResponseDto response = SchemasResponseDto.builder().build();
-    try (Connection connection = DbConnection.getConnection(datasource)){
+    try (Connection connection = DbConnection.getConnection(connectionDto)){
       response.getDatabaseSchemas().addAll(dbMetaDataService.getSchemas(connection));
     } catch (SQLException e) {
-      logAndThrowStructureLoadingFailResponse(datasource, e);
+      logAndThrowStructureLoadingFailResponse(connectionDto, e);
     }
     return response;
   }
 
-  public TablesResponseDto getTables(ConnectionDto datasource) {
+  public TablesResponseDto getTables(ConnectionDto connectionDto) {
     Collection<TableDto> tables = null;
-    try (Connection connection = DbConnection.getConnection(datasource)){
+    try (Connection connection = DbConnection.getConnection(connectionDto)){
       tables = dbMetaDataService.getTables(connection);
     } catch (SQLException e) {
-      logAndThrowStructureLoadingFailResponse(datasource, e);
+      logAndThrowStructureLoadingFailResponse(connectionDto, e);
     }
-    return TablesResponseDto.builder().tables(tables).databaseName(datasource.getDatabaseName()).build();
+    return TablesResponseDto.builder().tables(tables).databaseName(connectionDto.getDatabaseName()).build();
   }
 
-  public ColumnsResponseDto getColumns(String tableName, ConnectionDto datasource) {
-    return getColumns(tableName, datasource, false);
+  public ColumnsResponseDto getColumns(String tableName, ConnectionDto connectionDto) {
+    return getColumns(tableName, connectionDto, false);
   }
 
-  private ColumnsResponseDto getColumns(String tableName, ConnectionDto datasourceDto, boolean calculateStatistics) {
+  private ColumnsResponseDto getColumns(String tableName, ConnectionDto connectionDto, boolean calculateStatistics) {
     Collection<ColumnDto> columns = null;
     try {
-      DataSource dataSource = DbConnection.getDataSource(datasourceDto);
+      DataSource dataSource = DbConnection.getDataSource(connectionDto);
       columns = dbMetaDataService.getColumns(tableName, dataSource, calculateStatistics);
     } catch (SQLException e) {
-      logAndThrowStructureLoadingFailResponse(datasourceDto, e);
+      logAndThrowStructureLoadingFailResponse(connectionDto, e);
     }
     return ColumnsResponseDto.builder().columns(columns).build();
   }
 
-  public RowsResponseDto getDataPreview(String tableName, ConnectionDto datasource) {
+  public RowsResponseDto getDataPreview(String tableName, ConnectionDto connectionDto) {
     RowsResponseDto response = RowsResponseDto.builder().build();
+    String dataPreviewQuery = "SELECT * FROM " + tableName;
     try {
-      var jtm = new JdbcTemplate(DbConnection.getDataSource(datasource));
-      String sql = "SELECT * FROM " + tableName;
-      var rawRows = jtm.queryForList(sql);
-      rawRows.forEach(row -> {
-        response.getRows().add(row);
+      DataSource dataSource = DbConnection.getDataSource(connectionDto);
+      DataSourceTransactionManager transactionManager = new DataSourceTransactionManager(dataSource);
+      TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+      transactionTemplate.execute(action -> {
+        var jtm = new JdbcTemplate(dataSource);
+        var rawRows = jtm.queryForList(dataPreviewQuery);
+        rawRows.forEach(row -> {
+          response.getRows().add(row);
+        });
+        return true;
       });
     } catch (DataAccessException e) {
-      logAndThrowStructureLoadingFailResponse(datasource, e);
+      logAndThrowStructureLoadingFailResponse(connectionDto, e);
     }
     return response;
   }
 
-  private void logAndThrowStructureLoadingFailResponse(ConnectionDto datasource, Exception e) {
-    String message = String.format("Structure or data loading failed for datasource %s. Reason: %s", datasource, GlobalExceptionHandler.getLogMessage(e));
+  private void logAndThrowStructureLoadingFailResponse(ConnectionDto connectionDto, Exception e) {
+    String message = String.format("Structure or data loading failed for connectionDto %s. Reason: %s", connectionDto, GlobalExceptionHandler.getLogMessage(e));
     log.error(message, e);
     throw new GenericInternalErrorException(RestResponse.DB_STRUCTURE_LOADING_FAILED);
   }
 
-  public TableStatisticsDto getTableStatistics(String tableName, String schemaName, ConnectionDto datasource) {
-    Long recordsCount = null;
-    Long columnsCount = null;
+  public TableStatisticsDto getTableStatistics(String tableName, String schemaName, ConnectionDto connectionDto) {
+    TableStatisticsDtoBuilder builder = TableStatisticsDto.builder();
+    String recordsCountQuery = "SELECT count(*) FROM " + tableName;
+    String columnsCountQuery = "SELECT COUNT(*) AS `columns` FROM `information_schema`.`columns` WHERE " +
+      "`table_schema` = '" + schemaName + "' AND " +
+      "`table_name` =  '" + tableName + "';";
     try {
-      String recordsCountQuery = "SELECT count(*) FROM " + tableName;
-      recordsCount = queryForLong(recordsCountQuery, datasource);
-
-      String columnsCountQuery = "SELECT COUNT(*) AS `columns` FROM `information_schema`.`columns` WHERE " +
-        "`table_schema` = '" + schemaName + "' AND " +
-        "`table_name` =  '" + tableName + "';";
-      columnsCount = queryForLong(columnsCountQuery, datasource);
+      DataSource dataSource = DbConnection.getDataSource(connectionDto);
+      DataSourceTransactionManager transactionManager = new DataSourceTransactionManager(dataSource);
+      TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+      transactionTemplate.execute(action -> {
+        Long recordsCount = queryForLong(recordsCountQuery, dataSource);
+        Long columnsCount = queryForLong(columnsCountQuery, dataSource);
+        builder.recordsCount(recordsCount).columnsCount(columnsCount);
+        return true;
+      });
     } catch (DataAccessException e) {
-      logAndThrowStructureLoadingFailResponse(datasource, e);
+      logAndThrowStructureLoadingFailResponse(connectionDto, e);
     }
-    return TableStatisticsDto.builder().recordsCount(recordsCount).columnsCount(columnsCount).build();
+    return builder.build();
   }
 
-  private Long queryForLong(String sqlQuery, ConnectionDto datasource) {
-    var jtm = new JdbcTemplate(DbConnection.getDataSource(datasource));
+  private Long queryForLong(String sqlQuery, DataSource dataSource) {
+    var jtm = new JdbcTemplate(dataSource);
     return jtm.queryForObject(sqlQuery, new Object[] {}, Long.class);
   }
 
-  public ColumnsResponseDto getColumnsStatistics(String tableName, ConnectionDto datasource) {
-    return getColumns(tableName, datasource, true);
+  public ColumnsResponseDto getColumnsStatistics(String tableName, ConnectionDto connectionDto) {
+    return getColumns(tableName, connectionDto, true);
   }
 
 }
