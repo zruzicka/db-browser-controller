@@ -1,6 +1,5 @@
 package cz.zr.browser.exception;
 
-import cz.zr.browser.RestResponse;
 import lombok.Getter;
 
 @Getter

@@ -1,6 +1,5 @@
 package cz.zr.browser.exception;
 
-import cz.zr.browser.RestResponse;
 import cz.zr.browser.dto.response.ErrorResponseDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

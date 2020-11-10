@@ -1,7 +1,6 @@
-package cz.zr.browser;
+package cz.zr.browser.exception;
 
 import cz.zr.browser.dto.response.ErrorResponseDto;
-import cz.zr.browser.exception.GenericInternalErrorException;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.http.HttpStatus;

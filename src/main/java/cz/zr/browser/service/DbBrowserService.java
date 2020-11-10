@@ -1,6 +1,6 @@
 package cz.zr.browser.service;
 
-import cz.zr.browser.RestResponse;
+import cz.zr.browser.exception.RestResponse;
 import cz.zr.browser.dto.response.ColumnDto;
 import cz.zr.browser.dto.response.ColumnsResponseDto;
 import cz.zr.browser.dto.response.ConnectionDto;
@@ -97,7 +97,7 @@ public class DbBrowserService {
 
   public TableStatisticsDto getTableStatistics(String tableName, String schemaName, ConnectionDto connectionDto) {
     TableStatisticsDtoBuilder builder = TableStatisticsDto.builder();
-    String recordsCountQuery = "SELECT count(*) FROM " + tableName;
+    String recordsCountQuery = "SELECT count(*) FROM " + schemaName + "." + tableName;
     String columnsCountQuery = "SELECT COUNT(*) AS `columns` FROM `information_schema`.`columns` WHERE " +
       "`table_schema` = '" + schemaName + "' AND " +
       "`table_name` =  '" + tableName + "';";

@@ -1,6 +1,6 @@
 package cz.zr.browser.service;
 
-import cz.zr.browser.RestResponse;
+import cz.zr.browser.exception.RestResponse;
 import cz.zr.browser.dto.request.ConnectionRequestDto;
 import cz.zr.browser.dto.response.ConnectionDto;
 import cz.zr.browser.dto.response.ConnectionsResponseDto;
